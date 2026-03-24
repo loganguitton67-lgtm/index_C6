@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>匠心归位 - 作者职业分布与书法特征</title>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <style>
+        :root {
+            --ancient-yellow: #f2e6c9;
+            --vermilion: #962218;
+            --gold: #b3935d;
+            --ink: #1a1a1a;
+        }
+        body { background: var(--ancient-yellow); margin: 0; font-family: "STKaiti", serif; overflow: hidden; }
+        #main { width: 100vw; height: 100vh; }
+        .nav-back { position: absolute; top: 20px; left: 20px; z-index: 100; }
+        .nav-back a { color: var(--vermilion); text-decoration: none; font-weight: bold; font-size: 18px; }
+        
+        /* 深度定制悬浮窗样式 */
+        .custom-tooltip {
+            padding: 12px;
+            background: rgba(242, 230, 201, 0.98);
+            border: 2px solid var(--gold);
+            border-radius: 4px;
+            box-shadow: 5px 5px 15px rgba(0,0,0,0.2);
+            font-family: "STKaiti", serif;
+            color: var(--ink);
+            min-width: 200px;
+        }
+        .tooltip-title { color: var(--vermilion); font-size: 18px; font-weight: bold; border-bottom: 1px dashed var(--gold); margin-bottom: 8px; padding-bottom: 4px; }
+        .tooltip-style { color: #5c1611; font-style: italic; margin-top: 5px; font-size: 14px; }
+    </style>
+</head>
+<body>
+    <div class="nav-back"><a href="visualization.html">← 返回展厅</a></div>
+    <div id="main"></div>
+
+    <script>
+        var chart = echarts.init(document.getElementById('main'));
+        
+        // 职业及其对应的书体风格特征（基于数据分析与历史考据）
+        var pieData = [
+            { 
+                value: 438, name: '官员', 
+                style: '馆阁体楷书：端庄严谨，法度森严，反映官方行政制图的标准化要求。',
+                itemStyle: {color: '#962218'} 
+            },
+            { 
+                value: 114, name: '文人', 
+                style: '清逸楷书/行楷：笔致灵动，兼具考据功底，多见于私家地理研究。',
+                itemStyle: {color: '#b3935d'} 
+            },
+            { 
+                value: 38, name: '画工', 
+                style: '影绘楷书：笔法细腻，常与城市俯瞰图相结合，具较强视觉表现力。',
+                itemStyle: {color: '#d1c1a5'} 
+            },
+            { 
+                value: 29, name: '刻工', 
+                style: '金石碑刻体：苍劲有力，保留了石刻拓片的刀锋余韵，多见于宋代石刻。',
+                itemStyle: {color: '#a65d56'} 
+            },
+            { 
+                value: 17, name: '宫廷', 
+                style: '内府工楷：工整极至，用料考究，代表了皇家制图的最高工艺水平。',
+                itemStyle: {color: '#5c1611'} 
+            }
+        ];
+
+        var total = pieData.reduce(function(sum, item){ return sum + item.value; }, 0);
+        var percentMap = {};
+        pieData.forEach(function(item){
+            percentMap[item.name] = (item.value / total * 100).toFixed(1);
+        });
+
+        chart.setOption({
+            backgroundColor: 'transparent',
+            // 增强交互：让悬浮窗到相应环形上，并定制内容
+            tooltip: { 
+                trigger: 'item',
+                backgroundColor: 'transparent',
+                borderWidth: 0,
+                padding: 0,
+                formatter: function(params) {
+                    var data = params.data;
+                    return `
+                        <div class="custom-tooltip">
+                            <div class="tooltip-title">${data.name}身份</div>
+                            <div>数量：<b>${data.value}</b> 幅</div>
+                            <div>占比：<b>${percentMap[data.name]}%</b></div>
+                            <div class="tooltip-style"><b>典型笔墨：</b><br/>${data.style}</div>
+                        </div>
+                    `;
+                }
+            },
+            legend: {
+                orient: 'vertical',
+                right: '60%',
+                top: 'center',
+                itemWidth: 15,
+                itemHeight: 15,
+                itemGap: 12,
+                formatter: function(name){
+                    return '{name|' + name + '}\n{meta|' + percentMap[name] + '% / ' + pieData.find(function(d){ return d.name === name; }).value + '幅}';
+                },
+                textStyle: {
+                    rich: {
+                        name: { fontSize: 18, color: '#1a1a1a', fontFamily: 'STKaiti', lineHeight: 26 },
+                        meta: { fontSize: 13, color: '#666', fontFamily: 'Arial', lineHeight: 18 }
+                    }
+                }
+            },
+            series: [{
+                name: '作者职业',
+                type: 'pie',
+                radius: ['31%', '54%'],
+                center: ['18%', '50%'],
+                avoidLabelOverlap: true,
+                itemStyle: { borderRadius: 8, borderColor: '#f2e6c9', borderWidth: 4 },
+                label: { 
+                    show: true, 
+                    position: 'outside', 
+                    formatter: '{b}', 
+                    fontSize: 16, 
+                    color: '#1a1a1a',
+                    fontFamily: 'STKaiti'
+                },
+                // 聚焦反馈：悬停时其他部分淡出
+                emphasis: { 
+                    focus: 'self',
+                    label: { show: true, fontSize: 22, fontWeight: 'bold' },
+                    itemStyle: {
+                        shadowBlur: 20,
+                        shadowColor: 'rgba(0, 0, 0, 0.3)'
+                    }
+                },
+                data: pieData
+            }]
+        });
+
+        window.onresize = function() { chart.resize(); };
+    </script>
+</body>
+</html>
